@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import sklearn
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import RepeatedStratifiedKFold
 
@@ -9,13 +9,20 @@ data = pd.read_table("Challenge_GIN_release_profile_17804library_181query.txt", 
 #data = np.loadtxt("Challenge_GIN_release_profile_17804library_181query.txt", delimiter="\t", dtype="str")
 print(data)
 
-model = RandomForestClassifier()
+model = RandomForestRegressor(max_depth=5, bootstrap=True, random_state=0, n_jobs=-2)
 
 X = data.iloc[0:data.shape[1]]
 print(X.shape)
 Y = data.T
 print(Y.shape)
 
+model.fit(X, Y)
+
+
 #evaluate
-crossVal = RepeatedStratifiedKFold(n_splits=10, n_repeats=3, random_state=1)
-nScores = cross_val_score(model, X, y=Y, scoring='accuracy', cv=crossVal, n_jobs=1, error_score='raise')
+#crossVal = RepeatedStratifiedKFold(n_splits=10, n_repeats=3, random_state=1)
+#nScores = cross_val_score(model, X, y=Y, scoring='accuracy', cv=crossVal, n_jobs=1, error_score='raise')
+print(data.iloc[0])
+result = pd.DataFrame(model.predict([data.iloc[0]]))
+print(result)
+print(result.shape)
