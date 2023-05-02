@@ -1,18 +1,19 @@
 import numpy as np
 import pandas as pd
-import sklearn
+from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import RandomizedSearchCV, GridSearchCV
-from sklearn.metrics import mean_squared_error
+from testing import test
+import pickle
 
 def evaluate(model, test_features, test_labels):
     predictions = model.predict(test_features)
     errors = abs(predictions - test_labels)
     mape = 100 * np.mean(errors / test_labels)
-    accuracy = 100 - mape
+    accuracy = 100 - abs(mape)
     print('Model Performance')
-    print('Average Error: {:0.4f}'.format(np.mean(errors)))
-    print('Accuracy = {:0.2f}%.'.format(accuracy))
+    print(f'Average Error: {np.mean(np.mean(errors))}')
+    print(f'Accuracy = {np.mean(accuracy)}')
 
     return accuracy
 
@@ -24,7 +25,38 @@ print(X)
 # transpose is the output
 Y = data.T
 print(Y.shape)
+X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, random_state=42)
+print(X_train, X_test, y_train, y_test)
 
+#make model with params
+base_model = RandomForestRegressor(n_estimators= 1000, min_samples_split= 10, min_samples_leaf= 4, max_features= 0.1, max_depth= 70, bootstrap= True, n_jobs = -2)
+base_model.fit(X_train, y_train)
+
+#save model, comment out if already saved
+model_file = "rf_model.pickle"
+pickle.dump(base_model, open(model_file, "wb"))
+
+#load model
+base_model = pickle.load(open(model_file, 'rb'))
+
+#test on training set
+base_accuracy = evaluate(base_model, X_train, y_train)
+
+#test on validation set
+test(base_model, X_test, y_test)
+
+#make predictions for 40 withheld genes
+cols = pd.read_table("./ChallengeB/ChallengeB_release_hold_out_40_query_genes.txt")
+cols = cols['hold_out_query_genes']
+print(cols)
+X_withheld = data.loc[cols]
+preds = base_model.predict(X_withheld)
+
+#save predictions
+predictions = pd.DataFrame(preds, columns = data.index, index = cols).to_csv("randomforest_preds.csv")
+print(f"Predictions: {preds}")
+
+'''
 #################### Random grid search to find decent parameters #################
 # Number of trees in random forest
 n_estimators = [int(x) for x in np.linspace(start = 200, stop = 2000, num = 10)]
@@ -65,7 +97,7 @@ best_random = rf_random.best_estimator_
 random_accuracy = evaluate(best_random, X, Y)
 print('Improvement of {:0.2f}%.'.format( 100 * (random_accuracy - base_accuracy) / base_accuracy))
 
-'''
+
 ################# Grid search with cross val #############
 # Change this parameter grid based on the results of random search
 param_grid = {
