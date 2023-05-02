@@ -28,12 +28,12 @@ print(Y.shape)
 X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, random_state=42)
 print(X_train, X_test, y_train, y_test)
 
-#make model with params
+#make model with params, comment out if already saved
 base_model = RandomForestRegressor(n_estimators= 1000, min_samples_split= 10, min_samples_leaf= 4, max_features= 0.1, max_depth= 70, bootstrap= True, n_jobs = -2)
 base_model.fit(X_train, y_train)
 
 #save model, comment out if already saved
-model_file = "rf_model.pickle"
+model_file = "../rf_model.pickle"
 pickle.dump(base_model, open(model_file, "wb"))
 
 #load model
@@ -53,7 +53,7 @@ X_withheld = data.loc[cols]
 preds = base_model.predict(X_withheld)
 
 #save predictions
-predictions = pd.DataFrame(preds, columns = data.index, index = cols).to_csv("randomforest_preds.csv")
+predictions = pd.DataFrame(preds, columns = data.index, index = cols).T.to_csv("randomforest_preds.csv")
 print(f"Predictions: {preds}")
 
 '''
