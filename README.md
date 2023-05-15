@@ -4,4 +4,5 @@ Predict interactions between genes in human genome. Given known interactions for
 Models tested: Sklearn Random Forest Regressor, Keras Sequential Neural Net, Keras Autoencoder
 
 Input matrix: ~17,000 x 181 known interaction values
+
 Output: ~17,000 x 1 interaction predictions for query gene
